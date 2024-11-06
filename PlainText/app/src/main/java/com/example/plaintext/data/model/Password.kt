@@ -13,26 +13,12 @@ import kotlin.reflect.KProperty
 // Password deve ser uma entidade do Room
 // PasswordInfo deve ser uma classe de dados serializável
 
-@Entity(
-    tableName = "passwords"
-)
-@Immutable
-data class Password(
-    @PrimaryKey
-    @ColumnInfo(name = "id") val id: Int,
-)
 
-@Serializable
-@Parcelize
-data class PasswordInfo(
-    val id: Int,
+@Entity(tableName = "passwords")
+data class Password(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val name: String,
     val login: String,
     val password: String,
-    val notes: String,
-) : Parcelable {
-    operator fun getValue(nothing: Nothing?, property: KProperty<*>): Password =
-        Password(
-            id = id,
-        )
-    }
+    val notes: String? = null
+)
