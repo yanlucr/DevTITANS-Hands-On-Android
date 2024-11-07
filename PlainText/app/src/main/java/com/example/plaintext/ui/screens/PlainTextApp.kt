@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.example.plaintext.data.model.Password
 import com.example.plaintext.ui.screens.editList.EditList
+import com.example.plaintext.ui.screens.list.ListView
 import com.example.plaintext.ui.screens.login.Login_screen
 import com.example.plaintext.ui.screens.preferences.SettingsScreen
 import com.example.plaintext.utils.parcelableType
@@ -22,8 +23,13 @@ fun PlainTextApp(
     {
         composable<Screen.Login> {
             Login_screen(
-                navigateToSettings = {appState.navigateToPreferences()},
-                navigateToList = {}
+                navigateToSettings = { appState.navigateToPreferences() },
+                navigateToList = { appState.navigateToList() }
+            )
+        }
+        composable<Screen.List> {
+            ListView(
+                navigateToEdit = { password -> appState.navigateToEditList(password) }
             )
         }
         composable<Screen.EditList>(
