@@ -25,7 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
-import com.example.plaintext.data.model.PasswordInfo
+import com.example.plaintext.data.model.Password
 import com.example.plaintext.ui.screens.Screen
 import com.example.plaintext.ui.screens.login.TopBarComponent
 
@@ -36,15 +36,15 @@ data class EditListState(
     val notasState: MutableState<String>,
 )
 
-fun isPasswordEmpty(password: PasswordInfo): Boolean {
-    return password.name.isEmpty() && password.login.isEmpty() && password.password.isEmpty() && password.notes.isEmpty()
+fun isPasswordEmpty(password: Password): Boolean {
+    return password.name.isEmpty() && password.login.isEmpty() && password.password.isEmpty() && password.notes.isNullOrEmpty()
 }
 
 @Composable
 fun EditList(
     args: Screen.EditList,
     navigateBack: () -> Unit,
-    savePassword: (password: PasswordInfo) -> Unit
+    savePassword: (password: Password) -> Unit
 ) {
     val headerText = if (isPasswordEmpty(args.password)) "Adicionar nova senha" else "Editar senha"
 
@@ -52,7 +52,7 @@ fun EditList(
         nomeState = rememberSaveable { mutableStateOf<String>(args.password.name) },
         usuarioState = rememberSaveable { mutableStateOf<String>(args.password.login) },
         senhaState = rememberSaveable { mutableStateOf<String>(args.password.password) },
-        notasState = rememberSaveable { mutableStateOf<String>(args.password.notes) },
+        notasState = rememberSaveable { mutableStateOf<String>(args.password.notes ?: "") },
     )
 
     Scaffold(
@@ -131,7 +131,7 @@ fun EditInput(
 @Composable
 fun EditListPreview() {
     EditList(
-        Screen.EditList(PasswordInfo(1, "Nome", "Usuário", "Senha", "Notas")),
+        Screen.EditList(Password(1, "Nome", "Usuário", "Senha", "Notas")),
         navigateBack = {},
         savePassword = {}
     )
