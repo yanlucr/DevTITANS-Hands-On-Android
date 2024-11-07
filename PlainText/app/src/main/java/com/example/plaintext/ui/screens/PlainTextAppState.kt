@@ -8,7 +8,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.plaintext.data.model.PasswordInfo
+import com.example.plaintext.data.model.Password
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -30,7 +30,7 @@ sealed class Screen() {
 
     @Serializable
     data class EditList(
-        val password: PasswordInfo
+        val password: Password
     );
 
     @Serializable
@@ -65,7 +65,7 @@ class JetcasterAppState(
         navController.navigate(Screen.Login)
     }
 
-    fun navigateToEditList(password: PasswordInfo){
+    fun navigateToEditList(password: Password){
         navController.navigate(Screen.EditList(password))
     }
 
