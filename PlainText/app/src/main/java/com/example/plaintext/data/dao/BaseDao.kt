@@ -1,23 +1,14 @@
 package com.example.plaintext.data.dao
 
+import androidx.room.Database
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
+import androidx.room.RoomDatabase
 import androidx.room.Update
+import com.example.plaintext.data.model.Password
 
-interface BaseDao<T> {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(entity: T): Long
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(vararg entity: T)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(entities: Collection<T>)
-
-    @Update(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun update(entity: T)
-
-    @Delete
-    suspend fun delete(entity: T): Int
+@Database(entities = [Password::class], version = 1, exportSchema = false)
+abstract class AppDatabase : RoomDatabase() {
+    abstract fun passwordDao(): PasswordDao
 }
