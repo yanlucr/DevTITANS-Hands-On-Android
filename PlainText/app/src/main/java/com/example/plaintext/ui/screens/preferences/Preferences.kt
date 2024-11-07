@@ -18,13 +18,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.plaintext.ui.screens.hello.listViewState
 import com.example.plaintext.ui.screens.login.TopBarComponent
 import com.example.plaintext.ui.screens.util.PreferenceInput
 import com.example.plaintext.ui.screens.util.PreferenceItem
 import com.example.plaintext.ui.viewmodel.PreferencesState
 import com.example.plaintext.ui.viewmodel.PreferencesViewModel
 import kotlinx.coroutines.delay
-
 @Composable
 fun SettingsScreen(navController: NavHostController?,
                    viewModel: PreferencesViewModel = hiltViewModel()
@@ -40,6 +40,9 @@ fun SettingsScreen(navController: NavHostController?,
 
 @Composable
 fun SettingsContent(modifier: Modifier = Modifier, viewModel: PreferencesViewModel) {
+    var isSwitchChecked by remember { mutableStateOf(viewModel.preferencesState.preencher) }
+    var loginText by remember { mutableStateOf(viewModel.preferencesState.login) }
+    var passwordText by remember { mutableStateOf(viewModel.preferencesState.password) }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -49,32 +52,36 @@ fun SettingsContent(modifier: Modifier = Modifier, viewModel: PreferencesViewMod
         PreferenceInput(
             title = "Preencher Login",
             label = "Login",
-            fieldValue = "",
+            fieldValue = loginText,
             summary = "Preencher login na tela inicial"
         ){
-            // função para alterar o login
+            loginText = it
+            viewModel.updateLogin(it)
         }
 
         PreferenceInput(
             title = "Setar Senha",
             label = "Label",
-            fieldValue = "",
+            fieldValue = passwordText,
             summary = "Senha para entrar no sistema"
         ){
-            // função para alterar a senha
+            passwordText = it
+            viewModel.updatePassword(it)
         }
 
         PreferenceItem(
             title = "Preencher Login",
             summary = "Preencher login na tela inicial",
             onClick = {
-                // deve alterar o estado que representa se o switch está ligado ou não
+                isSwitchChecked = !isSwitchChecked
+                viewModel.updatePreencher(isSwitchChecked)
             },
             control = {
                 Switch(
-                    checked = false, // deve ler o estado que representa se o switch está ligado ou não
+                    checked = isSwitchChecked,
                     onCheckedChange = {
-                        // deve alterar o estado que representa se o switch está ligado ou não
+                        isSwitchChecked = it
+                        viewModel.updatePreencher(it)
                     }
                 )
             }

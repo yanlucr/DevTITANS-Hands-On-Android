@@ -7,6 +7,7 @@ import androidx.navigation.toRoute
 import com.example.plaintext.data.model.Password
 import com.example.plaintext.ui.screens.editList.EditList
 import com.example.plaintext.ui.screens.login.Login_screen
+import com.example.plaintext.ui.screens.preferences.SettingsScreen
 import com.example.plaintext.utils.parcelableType
 import kotlin.reflect.typeOf
 
@@ -21,7 +22,7 @@ fun PlainTextApp(
     {
         composable<Screen.Login> {
             Login_screen(
-                navigateToSettings = {},
+                navigateToSettings = {appState.navigateToPreferences()},
                 navigateToList = {}
             )
         }
@@ -33,6 +34,11 @@ fun PlainTextApp(
                 args,
                 navigateBack = { appState.navigateBack() },
                 savePassword = { password -> Unit }
+            )
+        }
+        composable<Screen.Preferences>{
+            SettingsScreen(
+                navController = appState.navController
             )
         }
     }
