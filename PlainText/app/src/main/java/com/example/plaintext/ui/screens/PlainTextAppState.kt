@@ -69,6 +69,10 @@ class JetcasterAppState(
         navController.navigate(Screen.EditList(password))
     }
 
+    fun navigateToPreferences(){
+        navController.navigate(Screen.Preferences)
+    }
+
     fun navigateBack() {
         navController.popBackStack()
     }
