@@ -29,7 +29,7 @@ fun PlainTextApp(
         }
         composable<Screen.List> {
             ListView(
-                navigateToEdit = { password -> appState.navigateToEditList(password) }
+                
             )
         }
         composable<Screen.EditList>(

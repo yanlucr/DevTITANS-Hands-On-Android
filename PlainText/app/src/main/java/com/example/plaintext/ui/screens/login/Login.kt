@@ -24,6 +24,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.plaintext.R
 import com.example.plaintext.ui.theme.PlainTextTheme
+import com.example.plaintext.ui.viewmodel.PreferencesViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -37,33 +38,31 @@ data class LoginViewState(
     val saveCredentials: Boolean = false
 )
 
-// Classe ViewModel para gerenciar o estado da LoginScreen
 @HiltViewModel
 class LoginViewModel @Inject constructor() : ViewModel() {
-
-    // Estado da tela de login
     var loginState by mutableStateOf(LoginViewState())
         private set
 
-    // Função para atualizar o campo de login
     fun updateLogin(newLogin: String) {
         loginState = loginState.copy(login = newLogin)
     }
 
-    // Função para atualizar o campo de senha
     fun updatePassword(newPassword: String) {
         loginState = loginState.copy(password = newPassword)
     }
 
-    // Função para alternar a opção de salvar credenciais
     fun toggleSaveCredentials() {
         loginState = loginState.copy(saveCredentials = !loginState.saveCredentials)
     }
 
-    // Exemplo de uma função que poderia simular a validação e navegação (não necessário para a task 2.2 atual)
-    fun validateCredentials(onSuccess: () -> Unit, onError: () -> Unit) {
+    // Função simplificada que recebe um lambda para validação
+    fun validateCredentials(
+        checkCredentials: (String, String) -> Boolean,
+        onSuccess: () -> Unit,
+        onError: () -> Unit
+    ) {
         viewModelScope.launch {
-            if (loginState.login.isNotBlank() && loginState.password.isNotBlank()) {
+            if (checkCredentials(loginState.login, loginState.password)) {
                 onSuccess()
             } else {
                 onError()
@@ -71,6 +70,8 @@ class LoginViewModel @Inject constructor() : ViewModel() {
         }
     }
 }
+
+
 
 
 data class LoginState(
@@ -81,7 +82,6 @@ data class LoginState(
     val checkCredentials: (login: String, password: String) -> Boolean,
 )
 
-
 @Composable
 fun Login_screen(
     navigateToSettings: () -> Unit,
@@ -90,6 +90,7 @@ fun Login_screen(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val preferencesViewModel: PreferencesViewModel = hiltViewModel()
     val loginState = viewModel.loginState
 
     Column(
@@ -152,14 +153,14 @@ fun Login_screen(
         // Botão de Envio
         Button(
             onClick = {
-                // Lógica de validação e navegação
                 viewModel.validateCredentials(
+                    checkCredentials = preferencesViewModel::checkCredentials,
                     onSuccess = {
                         Toast.makeText(context, "Login bem-sucedido!", Toast.LENGTH_SHORT).show()
                         navigateToList()
                     },
                     onError = {
-                        Toast.makeText(context, "Por favor, preencha ambos os campos.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Credenciais inválidas. Tente novamente.", Toast.LENGTH_SHORT).show()
                     }
                 )
             },
@@ -169,6 +170,7 @@ fun Login_screen(
         ) {
             Text("Enviar")
         }
+
     }
 
 }
