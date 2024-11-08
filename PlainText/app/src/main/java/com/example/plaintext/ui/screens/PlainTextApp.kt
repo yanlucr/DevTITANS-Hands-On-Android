@@ -43,9 +43,7 @@ fun PlainTextApp(
             )
         }
         composable<Screen.Preferences>{
-            SettingsScreen(
-                navController = appState.navController
-            )
+            SettingsScreen()
         }
     }
 }

@@ -1,15 +1,37 @@
 package com.example.plaintext.ui.screens.login
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,14 +44,10 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.plaintext.R
-import com.example.plaintext.ui.theme.PlainTextTheme
 import com.example.plaintext.ui.viewmodel.PreferencesViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-
 
 // Data class para representar o estado da LoginScreen
 data class LoginViewState(
@@ -71,108 +89,144 @@ class LoginViewModel @Inject constructor() : ViewModel() {
     }
 }
 
-
-
-
-data class LoginState(
-    val preencher: Boolean,
-    val login: String,
-    val navigateToSettings: () -> Unit,
-    val navigateToList: (name: String) -> Unit,
-    val checkCredentials: (login: String, password: String) -> Boolean,
-)
-
 @Composable
 fun Login_screen(
     navigateToSettings: () -> Unit,
+    navigateToList: () -> Unit
+) {
+    val viewModel: LoginViewModel = hiltViewModel()
+    val preferencesViewModel: PreferencesViewModel = hiltViewModel()
+
+    LoginScreenContent(
+        navigateToSensores = {  },
+        navigateToSettings = { navigateToSettings() },
+        navigateToList = { navigateToList() },
+        state = viewModel.loginState,
+        updateLogin = { viewModel.updateLogin(it) },
+        updatePassword = { viewModel.updatePassword(it) },
+        toggleSaveCredentials = { viewModel.toggleSaveCredentials() },
+        checkCredentials = { login, password ->
+            preferencesViewModel.checkCredentials(
+                login,
+                password
+            )
+        },
+        validateCredentials = { checkCredentials, onSuccess, onFailure ->
+            viewModel.validateCredentials(
+                checkCredentials,
+                onSuccess,
+                onFailure
+            )
+        }
+    )
+}
+
+@Composable
+fun LoginScreenContent(
+    navigateToSensores: () -> Unit,
+    navigateToSettings: () -> Unit,
     navigateToList: () -> Unit,
-    viewModel: LoginViewModel = hiltViewModel(),
-    modifier: Modifier = Modifier
+    state: LoginViewState,
+    updateLogin: (String) -> Unit,
+    updatePassword: (String) -> Unit,
+    toggleSaveCredentials: () -> Unit,
+    checkCredentials: (String, String) -> Boolean,
+    validateCredentials: ((String, String) -> Boolean, () -> Unit, () -> Unit) -> Unit
 ) {
     val context = LocalContext.current
-    val preferencesViewModel: PreferencesViewModel = hiltViewModel()
-    val loginState = viewModel.loginState
-
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // Logo e Slogan
-
-        Text(
-            text = "\"The most secure password manager\"\nBob and Alice",
-            textAlign = TextAlign.Center,
-            fontSize = 14.sp,
-            color = Color.White,
-            modifier = Modifier
-                .background(Color(0xFF81C784))
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Campos de Login e Senha
-        Text(text = "Digite suas credenciais para continuar", style = MaterialTheme.typography.bodyMedium)
-
-        OutlinedTextField(
-            value = loginState.login,
-            onValueChange = { viewModel.updateLogin(it) },
-            label = { Text("Login") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        )
-
-        OutlinedTextField(
-            value = loginState.password,
-            onValueChange = { viewModel.updatePassword(it) },
-            label = { Text("Senha") },
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        )
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Checkbox(
-                checked = loginState.saveCredentials,
-                onCheckedChange = { viewModel.toggleSaveCredentials() }
+    Scaffold(
+        topBar = {
+            TopBarComponent(
+                navigateToSettings = { navigateToSettings() },
+                navigateToSensores = { navigateToSensores() }
             )
-            Text(text = "Salvar as informações de login")
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Botão de Envio
-        Button(
-            onClick = {
-                viewModel.validateCredentials(
-                    checkCredentials = preferencesViewModel::checkCredentials,
-                    onSuccess = {
-                        Toast.makeText(context, "Login bem-sucedido!", Toast.LENGTH_SHORT).show()
-                        navigateToList()
-                    },
-                    onError = {
-                        Toast.makeText(context, "Credenciais inválidas. Tente novamente.", Toast.LENGTH_SHORT).show()
-                    }
-                )
-            },
+    ) { innerPadding ->
+        Column(
             modifier = Modifier
-                .defaultMinSize(minWidth = 120.dp)
-                .padding(8.dp)
+                .fillMaxWidth()
+                .padding(vertical = innerPadding.calculateTopPadding(), horizontal = 16.dp)
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Enviar")
+            // Logo e Slogan
+
+            Text(
+                text = "\"The most secure password manager\"\nBob and Alice",
+                textAlign = TextAlign.Center,
+                fontSize = 14.sp,
+                color = Color.White,
+                modifier = Modifier
+                    .background(Color(0xFF81C784))
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Campos de Login e Senha
+            Text(
+                text = "Digite suas credenciais para continuar",
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+            OutlinedTextField(
+                value = state.login,
+                onValueChange = { updateLogin(it) },
+                label = { Text("Login") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            )
+
+            OutlinedTextField(
+                value = state.password,
+                onValueChange = { updatePassword(it) },
+                label = { Text("Senha") },
+                visualTransformation = PasswordVisualTransformation(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            )
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Checkbox(
+                    checked = state.saveCredentials,
+                    onCheckedChange = { toggleSaveCredentials() }
+                )
+                Text(text = "Salvar as informações de login")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Botão de Envio
+            Button(
+                onClick = {
+                    validateCredentials(
+                        checkCredentials, {
+                            Toast.makeText(context, "Login bem-sucedido!", Toast.LENGTH_SHORT)
+                                .show()
+                            navigateToList()
+                        }, {
+                            Toast.makeText(
+                                context,
+                                "Credenciais inválidas. Tente novamente.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    )
+                },
+                modifier = Modifier
+                    .defaultMinSize(minWidth = 120.dp)
+                    .padding(8.dp)
+            ) {
+                Text("Enviar")
+            }
         }
-
     }
-
 }
 
 @Composable
@@ -245,26 +299,18 @@ fun TopBarComponent(
 }
 
 
-
 @Preview(showBackground = true)
 @Composable
 fun PreviewLoginScreen() {
-    PlainTextTheme {
-        Scaffold(
-            topBar = {
-                TopBarComponent(
-                    navigateToSettings = {},
-                    navigateToSensores = {}
-                )
-            }
-        ) { innerPadding ->
-            // Adiciona o padding ao Login_screen para evitar sobreposição com a TopBar
-            Login_screen(
-                navigateToSettings = {},
-                navigateToList = {},
-                modifier = Modifier.padding(innerPadding)
-            )
-        }
-    }
-
+    LoginScreenContent(
+        navigateToSensores = {},
+        navigateToSettings = {},
+        navigateToList = {},
+        state = LoginViewState("devtitans", "123", true),
+        updateLogin = {},
+        updatePassword = {},
+        toggleSaveCredentials = {},
+        checkCredentials = { _,_ -> true },
+        validateCredentials = { _,_,_ -> }
+    )
 }
