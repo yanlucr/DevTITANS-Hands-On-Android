@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -30,6 +31,7 @@ import com.example.plaintext.ui.screens.Screen
 import com.example.plaintext.ui.screens.login.TopBarComponent
 
 data class EditListState(
+    val idState: MutableState<Int>,
     val nomeState: MutableState<String>,
     val usuarioState: MutableState<String>,
     val senhaState: MutableState<String>,
@@ -49,6 +51,7 @@ fun EditList(
     val headerText = if (isPasswordEmpty(args.password)) "Adicionar nova senha" else "Editar senha"
 
     val state = EditListState(
+        idState = rememberSaveable { mutableIntStateOf(args.password.id ?: 0) },
         nomeState = rememberSaveable { mutableStateOf<String>(args.password.name) },
         usuarioState = rememberSaveable { mutableStateOf<String>(args.password.login) },
         senhaState = rememberSaveable { mutableStateOf<String>(args.password.password) },
@@ -86,7 +89,18 @@ fun EditList(
             )
 
             Button(
-                onClick = {},
+                onClick = {
+                    savePassword(
+                        Password(
+                            id = state.idState.value,
+                            name = state.nomeState.value,
+                            login = state.usuarioState.value,
+                            password = state.senhaState.value,
+                            notes = state.notasState.value
+                        )
+                    )
+                    navigateBack()
+                },
                 enabled = true
             ) {
                 Text("Salvar")

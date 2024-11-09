@@ -21,8 +21,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,71 +28,56 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.app.viewmodel.ListViewModel
+import com.example.app.viewmodel.ListViewState
 import com.example.plaintext.R
 import com.example.plaintext.data.model.Password
-import com.example.plaintext.ui.screens.login.Login_screen
 import com.example.plaintext.ui.screens.login.TopBarComponent
-import com.example.plaintext.ui.theme.PlainTextTheme
 
 @Preview
 @Composable
-fun ListView(){
-    PlainTextTheme {
-        // Simulação de dados de exemplo
-        val samplePasswords = listOf(
-            Password(
-                name = "Conta 1", login = "usuario1",
-                id = 21,
-                password = "usuario1"
+fun ListScreenPreview() {
+    val samplePasswords = listOf(
+        Password(
+            name = "Conta 1", login = "usuario1",
+            id = 21,
+            password = "usuario1"
 
-            ),
-            Password(
-                name = "Conta 2", login = "usuario2",
-                id = 22,
-                password = "usuario2"
+        ),
+        Password(
+            name = "Conta 2", login = "usuario2",
+            id = 22,
+            password = "usuario2"
 
-            ),
-            Password(
-                name = "Conta 3", login = "usuario3",
-                id = 23,
-                password = "usuario3"
+        ),
+        Password(
+            name = "Conta 3", login = "usuario3",
+            id = 23,
+            password = "usuario3"
 
-            )
         )
-
-        ListViewContent(
-            passwords = samplePasswords,
-            onAddClick = { /* Ação ao clicar no botão de adicionar */ },
-            navigateToEdit = { /* Ação ao clicar para editar */ }
-        )
-    }
+    )
+    ListScreen(
+        listState = ListViewState(isLoading = false, passwords = samplePasswords),
+        navigateToEdit = {}
+    )
 }
 
 @Composable
-fun ListViewContent(
-    passwords: List<Password>,
-    onAddClick: () -> Unit,
-    navigateToEdit: (Password) -> Unit
+fun ListScreen(
+    listState: ListViewState,
+    navigateToEdit: (password: Password) -> Unit
 ) {
     Scaffold(
-        floatingActionButton = {
-            AddButton(onClick = onAddClick)
-        }
-    ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
+        topBar = { TopBarComponent() },
+        floatingActionButton = { AddButton { navigateToEdit(Password(0, "", "", "")) } }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier.padding(innerPadding)
         ) {
-            items(passwords.size) { index ->
-                ListItem(
-                    password = passwords[index],
-                    navigateToEdit = navigateToEdit
-                )
-            }
+            ListItemContent(
+                listState = listState,
+                navigateToEdit = { navigateToEdit(it) }
+            )
         }
     }
 }
@@ -113,11 +96,10 @@ fun AddButton(onClick: () -> Unit) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ListItemContent(
-    modifier: Modifier,
-    viewModel: ListViewModel = hiltViewModel(),
+    modifier: Modifier = Modifier,
+    listState: ListViewState,
     navigateToEdit: (password: Password) -> Unit
 ) {
-    val listState by viewModel.viewState.collectAsState()
     when {
         listState.isLoading -> {
             LoadingScreen()
@@ -185,4 +167,3 @@ fun ListItem(
         )
     }
 }
-
