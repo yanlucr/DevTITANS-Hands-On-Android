@@ -1,6 +1,7 @@
 package com.example.plaintext.ui.screens
 
 import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
@@ -9,6 +10,7 @@ import com.example.plaintext.ui.screens.editList.EditList
 import com.example.plaintext.ui.screens.list.ListView
 import com.example.plaintext.ui.screens.login.Login_screen
 import com.example.plaintext.ui.screens.preferences.SettingsScreen
+import com.example.plaintext.ui.viewmodel.PreferencesViewModel
 import com.example.plaintext.utils.parcelableType
 import kotlin.reflect.typeOf
 
@@ -16,6 +18,7 @@ import kotlin.reflect.typeOf
 fun PlainTextApp(
     appState: JetcasterAppState = rememberJetcasterAppState()
 ) {
+    val preferencesViewModel: PreferencesViewModel = hiltViewModel()
     NavHost(
         navController = appState.navController,
         startDestination = Screen.Login,
@@ -24,7 +27,8 @@ fun PlainTextApp(
         composable<Screen.Login> {
             Login_screen(
                 navigateToSettings = { appState.navigateToPreferences() },
-                navigateToList = { appState.navigateToList() }
+                navigateToList = { appState.navigateToList() },
+                preferencesViewModel = preferencesViewModel
             )
         }
         composable<Screen.List> {
@@ -43,7 +47,9 @@ fun PlainTextApp(
             )
         }
         composable<Screen.Preferences>{
-            SettingsScreen()
+            SettingsScreen(
+                preferencesViewModel
+            )
         }
     }
 }

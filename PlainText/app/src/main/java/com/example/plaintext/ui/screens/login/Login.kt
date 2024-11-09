@@ -92,10 +92,10 @@ class LoginViewModel @Inject constructor() : ViewModel() {
 @Composable
 fun Login_screen(
     navigateToSettings: () -> Unit,
-    navigateToList: () -> Unit
+    navigateToList: () -> Unit,
+    preferencesViewModel: PreferencesViewModel
 ) {
     val viewModel: LoginViewModel = hiltViewModel()
-    val preferencesViewModel: PreferencesViewModel = hiltViewModel()
 
     LoginScreenContent(
         navigateToSensores = {  },
